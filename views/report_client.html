@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Boleta de Compras del Cliente</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+      }
+      #boletaCanvas {
+        border: 1px solid #000;
+        margin-top: 20px;
+      }
+      .print-button {
+        margin-top: 20px;
+      }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+  </head>
+  <body>
+    <h2>Boleta de Compras del Cliente</h2>
+    <canvas id="boletaCanvas"></canvas>
+    <div class="print-button">
+      <button onclick="window.print()">Imprimir Boleta</button>
+    </div>
+
+    <script>
+      function numeroALetras(num) {
+        const unidades = [
+          "",
+          "uno",
+          "dos",
+          "tres",
+          "cuatro",
+          "cinco",
+          "seis",
+          "siete",
+          "ocho",
+          "nueve",
+        ];
+        const decenas = [
+          "",
+          "diez",
+          "veinte",
+          "treinta",
+          "cuarenta",
+          "cincuenta",
+          "sesenta",
+          "setenta",
+          "ochenta",
+          "noventa",
+        ];
+        const centenas = [
+          "",
+          "cien",
+          "doscientos",
+          "trescientos",
+          "cuatrocientos",
+          "quinientos",
+          "seiscientos",
+          "setecientos",
+          "ochocientos",
+          "novecientos",
+        ];
+
+        function convertir(num) {
+          if (num === 0) return "cero";
+          if (num < 10) return unidades[num];
+          if (num < 100)
+            return (
+              decenas[Math.floor(num / 10)] +
+              (num % 10 > 0 ? " y " + unidades[num % 10] : "")
+            );
+          if (num < 1000)
+            return (
+              centenas[Math.floor(num / 100)] +
+              (num % 100 > 0 ? " " + convertir(num % 100) : "")
+            );
+          if (num < 1000000)
+            return (
+              (Math.floor(num / 1000) === 1
+                ? "mil"
+                : convertir(Math.floor(num / 1000)) + " mil") +
+              (num % 1000 > 0 ? " " + convertir(num % 1000) : "")
+            );
+          return "Número demasiado grande";
+        }
+
+        const enteros = Math.floor(num);
+        const centavos = Math.round((num - enteros) * 100);
+        let resultado = convertir(enteros);
+
+        if (centavos > 0) {
+          resultado += ` con ${centavos.toString().padStart(2, "0")}/100 soles`;
+        } else {
+          resultado += " soles";
+        }
+
+        return resultado.charAt(0).toUpperCase() + resultado.slice(1);
+      }
+
+      function cargarBoleta() {
+        const boletaData = JSON.parse(localStorage.getItem("boletaData"));
+
+        if (!boletaData) {
+          alert("No hay datos para mostrar la boleta.");
+          return;
+        }
+
+        const canvas = document.getElementById("boletaCanvas");
+        const ctx = canvas.getContext("2d");
+        const fecha = new Date();
+
+        const baseHeight = 400;
+        const productHeight = 25;
+        const totalHeight =
+          baseHeight + boletaData.compras.length * productHeight + 320;
+        const maxWidth =
+          Math.max(
+            ...boletaData.compras.map(
+              (compra) => ctx.measureText(compra.product_name).width
+            )
+          ) + 200;
+        canvas.width = Math.max(400, maxWidth);
+        canvas.height = totalHeight;
+
+        ctx.fillStyle = "#FFFFFF";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        const logoImage = new Image();
+        logoImage.src = "../uploads/products/ricplas2.png";
+        logoImage.onload = function () {
+          ctx.drawImage(logoImage, (canvas.width - 70) / 2, 5, 70, 60);
+
+          ctx.fillStyle = "#000000";
+          ctx.font = "bold 18px Arial";
+          ctx.textAlign = "center";
+          ctx.fillText("RICPLAST", canvas.width / 2, 75);
+          ctx.font = "bold 16px Arial";
+          ctx.fillText("EMPRESA RIC SAC", canvas.width / 2, 95);
+
+          ctx.font = "12px Arial";
+          ctx.fillText("RUC: 20451661478", canvas.width / 2, 115);
+          ctx.fillText("CALLE LAS PALMERAS 208", canvas.width / 2, 135);
+          ctx.fillText("Telf: 987 654 321", canvas.width / 2, 155);
+          ctx.fillText(
+            "Correo: Administrador@rcpst.com",
+            canvas.width / 2,
+            175
+          );
+          ctx.fillText("Web: www.Ricplast.com", canvas.width / 2, 195);
+          ctx.font = "bold 14px Arial";
+          ctx.fillText("BOLETA DE VENTA ELECTRÓNICA", canvas.width / 2, 220);
+          ctx.fillText("B002 - 10300686", canvas.width / 2, 235);
+          ctx.font = "12px Arial";
+          ctx.fillText(`Cliente: ${boletaData.cliente}`, canvas.width / 2, 254);
+          ctx.fillText(`---`, canvas.width / 2, 266);
+          ctx.font = "bold 14px Arial";
+          ctx.fillText(`DNI: ${boletaData.dni}`, canvas.width / 2, 281);
+          ctx.fillText(
+            `FECHA: ${fecha.toLocaleDateString(
+              "es-ES"
+            )}  HORA: ${fecha.toLocaleTimeString("es-ES")}`,
+            canvas.width / 2,
+            310
+          );
+
+          ctx.beginPath();
+          ctx.moveTo(20, 320);
+          ctx.lineTo(canvas.width - 20, 320);
+          ctx.lineWidth = 1;
+          ctx.strokeStyle = "#000000";
+          ctx.stroke();
+
+          let yPosition = 340;
+          ctx.font = "bold 12px Arial";
+          ctx.textAlign = "left";
+          ctx.fillText("Producto", 30, yPosition);
+          ctx.fillText("Cant.", 191, yPosition);
+          ctx.fillText("Precio", 250, yPosition);
+          ctx.fillText("Total", 320, yPosition);
+
+          ctx.beginPath();
+          ctx.moveTo(20, yPosition + 10);
+          ctx.lineTo(canvas.width - 20, yPosition + 10);
+          ctx.lineWidth = 1;
+          ctx.strokeStyle = "#000000";
+          ctx.stroke();
+
+          ctx.font = "12px Arial";
+          yPosition += 25;
+
+          boletaData.compras.forEach((compra) => {
+            ctx.fillText(compra.product_name, 30, yPosition);
+            ctx.fillText(compra.qty, 200, yPosition);
+            ctx.fillText(parseFloat(compra.price).toFixed(2), 250, yPosition);
+            ctx.fillText(parseFloat(compra.total).toFixed(2), 320, yPosition);
+            yPosition += productHeight;
+          });
+
+          ctx.beginPath();
+          ctx.moveTo(20, yPosition + 10);
+          ctx.lineTo(canvas.width - 20, yPosition + 10);
+          ctx.stroke();
+
+          yPosition += 30;
+          ctx.font = "bold 14px Arial";
+          ctx.textAlign = "center";
+          ctx.fillText(
+            `TOTAL GRAVADO                    (S/) ${parseFloat(
+              boletaData.total
+            ).toFixed(2)}`,
+            canvas.width / 2,
+            yPosition
+          );
+
+          const totalGravado = parseFloat(boletaData.total);
+          const igv = (totalGravado * 18) / 100;
+          const totalConIgv = totalGravado + igv;
+
+          yPosition += 30;
+          ctx.font = "bold 14px Arial";
+          ctx.textAlign = "center";
+          ctx.fillText(
+            `I.G.V                                         (S/) ${igv.toFixed(
+              2
+            )}`,
+            canvas.width / 2,
+            yPosition
+          );
+
+          yPosition += 30;
+          ctx.fillText(
+            `TOTAL                                       (S/) ${totalConIgv.toFixed(
+              2
+            )}`,
+            canvas.width / 2,
+            yPosition
+          );
+
+          ctx.beginPath();
+          ctx.moveTo(20, yPosition + 10);
+          ctx.lineTo(canvas.width - 20, yPosition + 10);
+          ctx.stroke();
+
+          const totalEnPalabras = numeroALetras(totalConIgv);
+          yPosition += 50;
+          ctx.font = "12px Arial";
+          ctx.textAlign = "center";
+          ctx.fillText(`Son: ${totalEnPalabras}`, canvas.width / 2, yPosition);
+
+          yPosition += 25;
+          ctx.fillText("Forma de pago: Efectivo", canvas.width / 2, yPosition);
+
+          yPosition += 25;
+          ctx.fillText("Cond. Venta: Contado", canvas.width / 2, yPosition);
+
+          const qrSize = 80;
+          const qr = new QRious({
+            value: JSON.stringify(boletaData),
+            size: qrSize,
+          });
+
+          const qrImage = new Image();
+          qrImage.src = qr.toDataURL();
+          qrImage.onload = function () {
+            ctx.drawImage(
+              qrImage,
+              (canvas.width - qrSize) / 2,
+              yPosition + 20,
+              qrSize,
+              qrSize
+            );
+
+            yPosition += qrSize + 20;
+            ctx.fillText(
+              "Representación impresa de la Boleta de Venta Electrónica",
+              canvas.width / 2,
+              yPosition + 20
+            );
+
+            ctx.fillText(
+              "Puede consultar en : WW.MIFACT.NET",
+              canvas.width / 2,
+              yPosition + 38
+            );
+
+            ctx.fillText(
+              "Autorizado mediante Resolución de Intendencia N° 0340050000000",
+              canvas.width / 2,
+              yPosition + 55
+            );
+          };
+        };
+      }
+
+      window.onload = cargarBoleta;
+    </script>
+  </body>
+</html>

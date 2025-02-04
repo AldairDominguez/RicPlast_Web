@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reporte de Kardex</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+      }
+      .report-container {
+        max-width: 900px;
+        margin: auto;
+        border: 1px solid #ddd;
+        padding: 20px;
+        position: relative;
+        background-color: #f9f9f9;
+      }
+      .header,
+      .footer {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+      .logo {
+        position: absolute;
+        top: -7px;
+        right: 770px;
+        width: 150px;
+        height: auto;
+      }
+      .factura-numero {
+        text-align: center;
+        border: 2px solid black;
+        display: inline-block;
+        padding: 20px;
+        font-size: 18px;
+        margin: 10px 0 10px 520px;
+        background-color: #f2f2f2;
+        font-weight: bold;
+        line-height: 1.5;
+      }
+      .info {
+        font-size: 10px;
+      }
+      .table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+        font-size: 12px; /* Cambiar tamaño de fuente de la tabla */
+      }
+      .table th,
+      .table td {
+        border: 1px solid black; /* Cambiar color de borde a negro */
+        padding: 10px;
+        text-align: center;
+        margin: 2px; /* Agregar margen de 2px */
+      }
+      .table th {
+        background-color: #f2f2f2;
+      }
+      .total-container {
+        text-align: right;
+        margin-top: 20px;
+        font-size: 12px;
+        font-weight: bold;
+      }
+      .print-button {
+        text-align: center;
+        margin-top: 20px;
+      }
+      .date-time-box {
+        position: absolute;
+        top: 10px;
+        right: 20px;
+        border: 1px solid #ddd;
+        padding: 5px 10px;
+        font-size: 12px;
+        text-align: right;
+        background-color: #f9f9f9;
+      }
+    </style>
+    <script>
+      function cargarDatos() {
+        // Obtener datos desde localStorage
+        const jsonData = localStorage.getItem("json_data");
+
+        if (!jsonData) {
+          alert(
+            "No hay datos en localStorage. Verifique que se hayan guardado correctamente."
+          );
+          return;
+        }
+
+        // Convertir a objeto JSON
+        let parsedData;
+        try {
+          parsedData = JSON.parse(jsonData);
+        } catch (error) {
+          console.error("Error al parsear JSON:", error);
+          alert("Error en el formato de datos.");
+          return;
+        }
+
+        let saldoFinal = 0;
+
+        // Función para sumar un día a una fecha
+        function sumarUnDia(fecha) {
+          const nuevaFecha = new Date(fecha);
+          nuevaFecha.setDate(nuevaFecha.getDate() + 1);
+          return nuevaFecha;
+        }
+
+        // Configurar encabezado
+        document.getElementById("fechaInicio").textContent = sumarUnDia(
+          new Date(parsedData.fecha_inicio)
+        ).toLocaleDateString("es-ES");
+        document.getElementById("fechaFin").textContent = sumarUnDia(
+          new Date(parsedData.fecha_fin)
+        ).toLocaleDateString("es-ES");
+        document.getElementById("nombreProducto").textContent =
+          parsedData.nombre_producto || "Producto Desconocido";
+
+        // Calcular el Stock Actual
+        const lastMovement =
+          parsedData.movements && parsedData.movements.length > 0
+            ? parsedData.movements[parsedData.movements.length - 1]
+            : null;
+        const stockActual = lastMovement ? lastMovement.Stock_Actual : "N/A";
+        document.getElementById("stockActual").textContent = stockActual;
+
+        // Llenar la tabla
+        const tableBody = document.getElementById("tableBody");
+        parsedData.movements.forEach((item) => {
+          const movimiento =
+            item.Tipo_Movimiento === "Entrada" ? "Entrada (+)" : "Salida (-)";
+          const proveedorOCliente = item.Proveedor || item.Cliente || "N/A";
+          const cantidad = item.Cantidad;
+          const total = item.Total ? parseFloat(item.Total).toFixed(2) : "N/A";
+
+          if (item.Total) {
+            saldoFinal += parseFloat(total);
+          }
+
+          const row = `<tr>
+                        <td>${sumarUnDia(
+                          new Date(item.Fecha_Movimiento)
+                        ).toLocaleDateString("es-ES")}</td>
+                        <td>${movimiento}</td>
+                        <td>${proveedorOCliente}</td>
+                        <td>${cantidad}</td>
+                        <td>${
+                          item.Stock_Anterior !== undefined
+                            ? item.Stock_Anterior
+                            : "N/A"
+                        }</td>
+                        <td>${
+                          item.Stock_Actual !== undefined
+                            ? item.Stock_Actual
+                            : "N/A"
+                        }</td>
+                        <td>${
+                          item.Precio
+                            ? parseFloat(item.Precio).toFixed(2)
+                            : "N/A"
+                        }</td>
+                        <td>${total}</td>
+                      </tr>`;
+          tableBody.insertAdjacentHTML("beforeend", row);
+        });
+
+        document.getElementById("saldoFinal").textContent =
+          saldoFinal.toFixed(2);
+
+        // Mostrar la fecha y hora actual en el cuadro superior derecho
+        const dateTime = new Date();
+        document.getElementById(
+          "currentDateTime"
+        ).textContent = `${dateTime.toLocaleDateString(
+          "es-ES"
+        )} ${dateTime.toLocaleTimeString("es-ES")}`;
+      }
+
+      window.onload = cargarDatos;
+    </script>
+  </head>
+  <body>
+    <div class="report-container">
+      <img
+        src="../uploads/products/ricplas2.png"
+        alt="RicPlas Logo"
+        class="logo"
+      />
+      <div class="date-time-box">
+        <span id="currentDateTime"></span>
+      </div>
+      <div class="header">
+        <h2>Reporte Kardex de Producto</h2>
+        <p>
+          Del <span id="fechaInicio">-</span> al <span id="fechaFin">-</span> |
+          Producto: <span id="nombreProducto">-</span> | Stock Actual:
+          <span id="stockActual">N/A</span>
+        </p>
+      </div>
+      <div class="subheader" style="font-size: 12px">
+        <p>Almacén: PROD RICPLAST</p>
+      </div>
+      <div class="subheader" style="font-size: 12px">
+        <p>Línea: PLÁSTICOS</p>
+      </div>
+      <div class="subheader" style="font-size: 12px">
+        <p>Sublínea: PLÁSTICOS</p>
+      </div>
+
+      <div class="table-container">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Fecha Mov.</th>
+              <th>Movimiento</th>
+              <th>Proveedor/Cliente</th>
+              <th>Cantidad</th>
+              <th>Stock Anterior</th>
+              <th>Stock Actual</th>
+              <th>Precio</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            <!-- Aquí se insertarán las filas dinámicamente -->
+          </tbody>
+        </table>
+      </div>
+
+      <div class="total-container">
+        <p>Saldo Final: <span id="saldoFinal">0.00</span></p>
+      </div>
+
+      <div class="footer">
+        <p>Gracias por su preferencia.</p>
+      </div>
+
+      <div class="print-button">
+        <button onclick="window.print()">Imprimir Reporte</button>
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Factura Electrónica</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+      }
+      .factura-container {
+        max-width: 800px;
+        margin: auto;
+        border: 1px solid #ddd;
+        padding: 20px;
+        position: relative;
+      }
+      .header,
+      .footer {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+      .logo {
+        position: absolute;
+        top: 0px;
+        right: 628px;
+        width: 170px;
+        height: auto;
+      }
+      .factura-numero {
+        text-align: center;
+        border: 2px solid black;
+        display: inline-block;
+        padding: 20px;
+        font-size: 18px;
+        margin: 10px 0 10px 520px;
+        background-color: #f2f2f2;
+        font-weight: bold;
+        line-height: 1.5;
+      }
+      .info {
+        font-size: 10px;
+      }
+      .table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+        font-size: 12px; /* Cambiar tamaño de fuente de la tabla */
+      }
+      .table th,
+      .table td {
+        border: 1px solid black; /* Cambiar color de borde a negro */
+        padding: 10px;
+        text-align: center;
+        margin: 2px; /* Agregar margen de 2px */
+      }
+      .table th {
+        background-color: #f2f2f2;
+      }
+      .total-container {
+        text-align: right;
+        margin-top: 20px;
+        font-size: 12px;
+        font-weight: bold;
+      }
+      .print-button {
+        text-align: center;
+        margin-top: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="factura-container">
+      <!-- Imagen de logo -->
+      <img
+        src="../uploads/products/ricplas2.png"
+        alt="RicPlas Logo"
+        class="logo"
+      />
+
+      <div class="header">
+        <div id="factura-numero" class="factura-numero"></div>
+      </div>
+      <div class="info" style="display: flex; justify-content: space-between">
+        <div>
+          <p><strong>EMRESA RIC SAC</strong></p>
+          <p>EMPRESA RIC SAC</p>
+          <p>CALLE LAS PALMERAS, LIMA LIMA 1</p>
+          <p>CERCADO DE LIMA - LIMA - LIMA - LIMA</p>
+        </div>
+        <div>
+          <p><strong>RUC:</strong> 20545684447</p>
+          <p><strong>Fecha Emisión:</strong> <span id="fecha"></span></p>
+          <p><strong>Fecha Vencimiento:</strong> 28/12/2024</p>
+          <p><strong>Orden de Compra:</strong> VU-OC2024-010000154</p>
+        </div>
+      </div>
+
+      <div class="info">
+        <p>
+          <strong>NOMBRE/RAZON:</strong> <span id="proveedor_nombre"></span>
+        </p>
+        <p>
+          <strong>Dirección:</strong> <span id="proveedor_direccion"></span>
+        </p>
+        <p><strong>Moneda:</strong> Soles Peruanos</p>
+        <p><strong>Forma de Pago:</strong> Crédito</p>
+        <p><strong>Guía de Remisión - Remitente:</strong> T001-000986549</p>
+      </div>
+
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Item</th>
+            <th>Código</th>
+            <th>Descripción</th>
+            <th>Und.</th>
+            <th>Cantidad</th>
+            <th>Categoría</th>
+            <th>Precio Unitario</th>
+          </tr>
+        </thead>
+        <tbody id="productos"></tbody>
+      </table>
+
+      <div class="total-container">
+        <p id="total_en_palabras"></p>
+        <p>Op. Gravada: <span id="total_general">S/ 0.00</span></p>
+        <p>I.G.V: <span id="igv">S/ 3.10</span></p>
+        <p>Op. Inafecta : <span>S/ 0000</span></p>
+        <p>Op. Exonerada : <span>S/ 0000</span></p>
+        <p>Op. Exportacion : <span>S/ 0000</span></p>
+        <p style="border-top: 1px solid black; padding-top: 0%; width: 200px; margin-left: auto;"></p>
+          Importe Total: <span id="sub_total">S/ 0.00</span>
+        </p>
+      </div>
+      <div style="border: 1px solid black; padding: 8px; margin-top: 13px; font-size: 9px;">
+        <p><strong>Observaciones de SUNAT:</strong></p>
+        <p>La factura número F001-00069923, ha sido aceptada</p>
+      </div>
+
+
+      <table style="border: 1px solid black; padding: 8px; margin-top: 13px; font-size: 9px; width: 100%; border-collapse: collapse;">
+        <p style="font-size: 10px;">Información Adicional</p>
+        <tbody>
+          <tr>
+            <td style="border: 1px solid black; padding: 5px;">1</td>
+            <td style="border: 1px solid black; padding: 5px;">Número de Cuenta Dólares BCP</td>
+            <td style="border: 1px solid black; padding: 5px;">$. 192-0726759-1-08 | BBVA $. 0011-0166-0100021556</td>
+          </tr>
+          <tr>
+            <td style="border: 1px solid black; padding: 5px;">2</td>
+            <td style="border: 1px solid black; padding: 5px;">Número de Cuenta Soles BCP</td>
+            <td style="border: 1px solid black; padding: 5px;">S/. 192-0043669-0-99 | BBVA S/. 0011-0166-0100004783</td>
+          </tr>
+          <tr>
+            <td style="border: 1px solid black; padding: 5px;">3</td>
+            <td style="border: 1px solid black; padding: 5px;">Pedido</td>
+            <td style="border: 1px solid black; padding: 5px;">PFA-000498</td>
+          </tr>
+          <tr>
+            <td style="border: 1px solid black; padding: 5px;">4</td>
+            <td style="border: 1px solid black; padding: 5px;">Teléfono</td>
+            <td style="border: 1px solid black; padding: 5px;">962712985</td>
+          </tr>
+          <tr>
+            <td style="border: 1px solid black; padding: 5px;">5</td>
+            <td style="border: 1px solid black; padding: 5px;">Vendedor</td>
+            <td style="border: 1px solid black; padding: 5px;">J1 - WEB - FABIAN MONTERO</td>
+          </tr>
+          <tr>
+            <td style="border: 1px solid black; padding: 5px;">6</td>
+            <td style="border: 1px solid black; padding: 5px;">Condición de Pago</td>
+            <td style="border: 1px solid black; padding: 5px;">FN01 - Fact Negociable 30 días</td>
+          </tr>
+          <tr>
+            <td style="border: 1px solid black; padding: 5px;">7</td>
+            <td style="border: 1px solid black; padding: 5px;">TIPO DE CAMBIO</td>
+            <td style="border: 1px solid black; padding: 5px;">3.762</td>
+          </tr>
+          <tr>
+            <td style="border: 1px solid black; padding: 5px;">8</td>
+            <td style="border: 1px solid black; padding: 5px;">Detalle Factura</td>
+            <td style="border: 1px solid black; padding: 5px;">SANTIAGO RENGIFO-DNI.111111 | 962712985 | DESTINO:MIRAFLORES/RECIBE:SANTIAGO/DESPACHO:LUNES 02 DE DIC/OC:010000154</td>
+          </tr>
+        </tbody>
+        
+      </table>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+      <script>
+        const qr = new QRious({
+          element: document.createElement('canvas'),
+          value: window.location.href,
+          size: 150,
+        });
+
+        const qrContainer = document.createElement('div');
+        qrContainer.style.textAlign = 'right';
+        qrContainer.style.marginTop = '20px';
+        qrContainer.appendChild(qr.element);
+
+        document.querySelector('.factura-container').appendChild(qrContainer);
+      </script>
+      <div style="text-align: left; margin-top: 20px; font-size: 12px;">
+        <p>Código lxZkqrIYIpa2WnnPH+7ZIt8qdLs=</p>
+        <p>Autorizado a ser emisor electrónico mediante R.I. SUNAT Nº0340050004781</p>
+      </div>
+      
+      <div class="footer">
+        <p>Gracias por su preferencia.</p>
+      </div>
+
+      <div class="print-button">
+        <button onclick="window.print()">Imprimir Factura</button>
+      </div>
+    </div>
+
+    <script>
+      const generateFacturaNumber = () => {
+        const serie = "F001";
+        const correlativo = Math.floor(100000 + Math.random() * 900000);
+        return `${serie}-${correlativo}`;
+      };
+
+      // Obtener los datos de la URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const data = urlParams.get("data");
+
+      if (!data) {
+        alert("No se recibieron datos para la factura.");
+        window.close();
+      }
+
+      try {
+        // Decodificar los datos
+        const facturaData = JSON.parse(atob(data));
+
+        // Validar datos antes de procesarlos
+        if (
+          !facturaData.proveedor ||
+          !facturaData.productos ||
+          facturaData.productos.length === 0
+        ) {
+          throw new Error("Datos de proveedor o productos incompletos.");
+        }
+
+        // Extraer datos del proveedor y generar el número de factura
+        const rucProveedor = facturaData.proveedor.proveedor_ruc || "N/A";
+        const numeroFactura = generateFacturaNumber();
+
+        // Asignar el número de factura generado junto con el RUC correcto
+        document.getElementById("factura-numero").innerHTML = `
+          RUC N° ${rucProveedor}<br>
+          FACTURA ELECTRÓNICA<br>
+          ${numeroFactura}
+        `;
+
+        // Rellenar los campos de la factura
+        document.getElementById("proveedor_nombre").textContent =
+          facturaData.proveedor.proveedor_nombre || "N/A";
+        document.getElementById("proveedor_direccion").textContent =
+          facturaData.proveedor.proveedor_direccion || "N/A";
+        document.getElementById("fecha").textContent =
+          facturaData.fecha || "N/A";
+
+        // Llenar la tabla de productos
+        const productos = facturaData.productos || [];
+        const tbody = document.getElementById("productos");
+        let totalGeneral = 0;
+
+        productos.forEach((producto, index) => {
+          // Validar y convertir datos
+          const precioUnitario =
+            parseFloat(producto.producto_precio_unitario) || 0;
+          const stock = parseInt(producto.producto_stock) || 0;
+          const subtotal = precioUnitario * stock;
+          totalGeneral += subtotal;
+
+          const row = `
+            <tr>
+                <td>${index + 1}</td>
+                <td>B01000${producto.producto_id}</td>
+                <td>${producto.producto_nombre || "N/A"}</td>
+                <td>B62</td>
+                <td>${stock}</td>
+                <td>${producto.categoria_nombre || "N/A"}</td>
+                <td>S/ ${precioUnitario.toFixed(2)}</td>
+            </tr>
+          `;
+          tbody.insertAdjacentHTML("beforeend", row);
+        });
+        
+        // Mostrar el total general
+        document.getElementById(
+          "total_general"
+        ).textContent = `S/ ${totalGeneral.toFixed(2)}`;
+
+        // Calcular y mostrar el IGV y el Sub Total
+        const igv = 3.1;
+        const subTotal = totalGeneral + igv;
+        document.getElementById("igv").textContent = `S/ ${igv.toFixed(2)}`;
+        document.getElementById(
+          "sub_total"
+        ).textContent = `S/ ${subTotal.toFixed(2)}`;
+
+        // Convertir el subtotal a palabras
+        const numberToWords = (num) => {
+          const unidades = [
+            "",
+            "UNO",
+            "DOS",
+            "TRES",
+            "CUATRO",
+            "CINCO",
+            "SEIS",
+            "SIETE",
+            "OCHO",
+            "NUEVE",
+          ];
+          const decenas = [
+            "",
+            "DIEZ",
+            "VEINTE",
+            "TREINTA",
+            "CUARENTA",
+            "CINCUENTA",
+            "SESENTA",
+            "SETENTA",
+            "OCHENTA",
+            "NOVENTA",
+          ];
+          const centenas = [
+            "",
+            "CIEN",
+            "DOSCIENTOS",
+            "TRESCIENTOS",
+            "CUATROCIENTOS",
+            "QUINIENTOS",
+            "SEISCIENTOS",
+            "SETECIENTOS",
+            "OCHOCIENTOS",
+            "NOVECIENTOS",
+          ];
+
+          const convertToWords = (n) => {
+            if (n === 0) return "CERO";
+            if (n < 10) return unidades[n];
+            if (n < 100)
+              return (
+                decenas[Math.floor(n / 10)] +
+                (n % 10 ? " Y " + unidades[n % 10] : "")
+              );
+            if (n < 1000)
+              return (
+                centenas[Math.floor(n / 100)] +
+                (n % 100 ? " " + convertToWords(n % 100) : "")
+              );
+            if (n < 1000000)
+              return (
+                convertToWords(Math.floor(n / 1000)) +
+                " MIL" +
+                (n % 1000 ? " " + convertToWords(n % 1000) : "")
+              );
+            return (
+              convertToWords(Math.floor(n / 1000000)) +
+              " MILLONES" +
+              (n % 1000000 ? " " + convertToWords(n % 1000000) : "")
+            );
+          };
+
+          const integerPart = Math.floor(num);
+          const decimalPart = Math.round((num - integerPart) * 100);
+          return `${convertToWords(
+            integerPart
+          )} CON ${decimalPart}/100 SOLES PERUANOS`;
+        };
+
+        // Mostrar el subtotal en palabras
+        const subTotalEnPalabras = numberToWords(subTotal);
+        document.getElementById("total_en_palabras").textContent =
+          subTotalEnPalabras;
+      } catch (error) {
+        alert("Error al procesar los datos de la factura.");
+        console.error(error);
+        window.close();
+      }
+
+      
+    </script>
+    
+  </body>
+</html>
